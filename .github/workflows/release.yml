@@ -55,7 +55,7 @@ jobs:
           mkdir publish
           mkdir publish/lib
           cd ..
-          copy build/lib/Release/sayhello.lib build/publish/lib
+          copy build/sayhello/Release/sayhello.lib build/publish/lib
           Compress-Archive -Path include, build/publish/lib -DestinationPath assets.zip
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
@@ -100,7 +100,7 @@ jobs:
           make
           cd ..
           mkdir lib
-          cp -f build/lib/libsayhello.a lib
+          cp -f build/sayhello/libsayhello.a lib
           mv -f include include/
           tar -zcvf assets.tar.gz include lib
       - name: Load Release URL File from release job
@@ -146,7 +146,7 @@ jobs:
           make
           cd ..
           mkdir -p lib
-          cp -f build/lib/libsayhello.a lib
+          cp -f build/sayhello/libsayhello.a lib
           mv -f include include/
           tar -zcvf assets.tar.gz include lib
       - name: Load Release URL File from release job
