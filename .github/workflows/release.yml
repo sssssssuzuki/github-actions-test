@@ -1,0 +1,173 @@
+on:
+  push:
+    tags:
+    - 'v*'
+
+name: Upload Release Asset
+
+jobs:
+  release:
+    name: Create Github Release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+    - name: Output Release URL File
+      run: echo "${{ steps.create_release.outputs.upload_url }}" > release_url.txt
+    - name: Save Release URL File for publish
+      uses: actions/upload-artifact@v1
+      with:
+        name: release_url
+        path: release_url.txt
+
+  publish_win:
+    needs: [release]
+    name: Upload Release Asset Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        uses: actions/github-script@0.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-win-x64.zip';
+      - name: Checkout submodules
+        run: git submodule update --init --force --recursive
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v1
+      - name: Build project
+        run: |
+          cd client
+          cmake -G "Visual Studio 16 2019" -A x64 -B "build"
+          cd build
+          msbuild github-actions-sample.sln /t:build /p:Configuration=Release -maxcpucount
+          mkdir publish
+          mkdir publish/lib
+          cd ..
+          copy build/lib/Release/sayhello.lib build/publish/lib
+          Compress-Archive -Path include, build/publish/lib -DestinationPath assets.zip
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          $value=cat release_url/release_url.txt
+          echo "::set-output name=upload_url::$value"
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./assets.zip
+          asset_name: ${{ steps.get_version.outputs.result }}
+          asset_content_type: application/zip
+
+  publish_linux:
+    needs: [release]
+    name: Upload Release Asset Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        uses: actions/github-script@0.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-linux-x64.tar.gz';
+      - name: Build project
+        run: |
+          cd client
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+          cd ..
+          mkdir lib
+          cp -f build/lib/libsayhello.a lib
+          mv -f include include/
+          tar -zcvf assets.tar.gz include lib
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          value=`cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./assets.tar.gz
+          asset_name: ${{ steps.get_version.outputs.result }}
+          asset_content_type: application/octet-stream
+
+  publish_mac:
+    needs: [release]
+    name: Upload Release Asset MacOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        uses: actions/github-script@0.5.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          result-encoding: string
+          script: |
+            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-macos-x64.tar.gz';
+      - name: Build project
+        run: |
+          cd client
+          mkdir -p build
+          cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release
+          make
+          cd ..
+          mkdir -p lib
+          cp -f build/lib/libsayhello.a lib
+          mv -f include include/
+          tar -zcvf assets.tar.gz include lib
+      - name: Load Release URL File from release job
+        uses: actions/download-artifact@v1
+        with:
+          name: release_url
+      - name: Get Release File Name & Upload URL
+        id: get_release_info
+        run: |
+          value=`cat release_url/release_url.txt`
+          echo ::set-output name=upload_url::$value
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./assets.tar.gz
+          asset_name: ${{ steps.get_version.outputs.result }}
+          asset_content_type: application/octet-stream
