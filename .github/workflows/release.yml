@@ -101,7 +101,6 @@ jobs:
           cd ..
           mkdir lib
           cp -f build/sayhello/libsayhello.a lib
-          mv -f include include/
           tar -zcvf assets.tar.gz include lib
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
@@ -147,7 +146,6 @@ jobs:
           cd ..
           mkdir -p lib
           cp -f build/sayhello/libsayhello.a lib
-          mv -f include include/
           tar -zcvf assets.tar.gz include lib
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
