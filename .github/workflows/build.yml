@@ -32,17 +32,3 @@ jobs:
         cmake .. -DCMAKE_BUILD_TYPE=Release
         make
         
-  lint:
-    name: lint
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: lint
-      run: |
-        mkdir -p build && cd build
-        cmake ..
-        make cpplint
