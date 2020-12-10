@@ -21,5 +21,5 @@ else()
     include(cmakes/linux.cmake)
 endif()
 
-add_subdirectory(lib)
+add_subdirectory(sayhello)
 add_subdirectory(test)
