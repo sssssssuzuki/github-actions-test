@@ -49,7 +49,6 @@ jobs:
         uses: microsoft/setup-msbuild@v1
       - name: Build project
         run: |
-          cd client
           cmake -G "Visual Studio 16 2019" -A x64 -B "build"
           cd build
           msbuild github-actions-sample.sln /t:build /p:Configuration=Release -maxcpucount
@@ -95,7 +94,6 @@ jobs:
             return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-linux-x64.tar.gz';
       - name: Build project
         run: |
-          cd client
           mkdir -p build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -142,7 +140,6 @@ jobs:
             return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-macos-x64.tar.gz';
       - name: Build project
         run: |
-          cd client
           mkdir -p build
           cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release

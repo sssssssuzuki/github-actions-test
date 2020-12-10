@@ -22,14 +22,12 @@ jobs:
     - name: build for Windows
       if: matrix.os == 'windows-latest'
       run: |
-        cd client
         cmake -G "Visual Studio 16 2019" -A x64 -B "build"
         cd build
         msbuild github-actions-sample.sln /t:build /p:Configuration=Release
     - name: build for Linux, macOS
       if: matrix.os != 'windows-latest'
       run: |
-        cd client
         mkdir -p build && cd build
         cmake .. -DCMAKE_BUILD_TYPE=Release
         make
@@ -45,7 +43,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: lint
       run: |
-        cd client
         mkdir -p build && cd build
         cmake ..
         make cpplint
