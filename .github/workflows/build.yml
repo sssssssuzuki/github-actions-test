@@ -29,7 +29,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt update
-        sudo apt install gcc-10 g++-10 g++-arm-linux-gnueabihf -y
+        sudo apt install gcc-10 g++-10 g++-arm-linux-gnueabihf g++-aarch64-linux-gnu -y
       shell: bash
     - name: build for Linux
       if: matrix.os == 'ubuntu-latest'
@@ -41,11 +41,21 @@ jobs:
       env:
         CC: gcc-10
         CXX: g++-10
-    - name: build for raspberry pi
+    - name: build for arm32
       if: matrix.os == 'ubuntu-latest'
       run: |
         mkdir -p build && cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=RASPI
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=ARM32
+        make
+      shell: bash
+      env:
+        CC: gcc-10
+        CXX: g++-10
+    - name: build for aarch64
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mkdir -p build && cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=ARM64
         make
       shell: bash
       env:
