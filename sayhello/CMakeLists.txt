@@ -19,7 +19,7 @@ if (POLICY CMP0079)
 endif()
 
 file(GLOB cpp_files *.cpp)
-file(GLOB include_files  ../include/*.h)
+file(GLOB include_files  ../include/*.hpp)
 
 set(SOURCE_LIST 
   ${cpp_files}
@@ -35,4 +35,8 @@ if (WIN32)
 endif()
 if(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch x86_64 -arch arm64")
+endif()
+
+if(NOT WIN32)
+  set_target_properties(sayhello PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()

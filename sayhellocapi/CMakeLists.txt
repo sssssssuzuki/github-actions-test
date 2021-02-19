@@ -19,7 +19,7 @@ if (POLICY CMP0079)
 endif()
 
 file(GLOB cpp_files *.cpp)
-file(GLOB include_files  ../include/*.h)
+file(GLOB include_files *.h ../include/*.h)
 
 set(SOURCE_LIST 
   ${cpp_files}
@@ -27,6 +27,7 @@ set(SOURCE_LIST
 )
 
 add_library(sayhellocapi SHARED ${SOURCE_LIST})
+target_link_libraries(sayhellocapi sayhello)
 
 include_directories(../include)
 
@@ -35,4 +36,8 @@ if (WIN32)
 endif()
 if(APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch x86_64 -arch arm64")
+endif()
+
+if(NOT WIN32)
+  set_target_properties(sayhellocapi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
