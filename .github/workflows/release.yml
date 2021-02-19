@@ -42,21 +42,35 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
-            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-win-x64.zip';
+            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-win';
       - name: Checkout submodules
         run: git submodule update --init --force --recursive
       - name: setup-msbuild
         uses: microsoft/setup-msbuild@v1
-      - name: Build project
+      - name: Build project x64
         run: |
           cmake -G "Visual Studio 16 2019" -A x64 -B "build"
           cd build
           msbuild github-actions-sample.sln /t:build /p:Configuration=Release -maxcpucount
           mkdir publish
+          mkdir publish/bin
           mkdir publish/lib
           cd ..
+          copy build/sayhellocapi/Release/sayhellocapi.lib build/publish/bin
           copy build/sayhello/Release/sayhello.lib build/publish/lib
-          Compress-Archive -Path include, build/publish/lib -DestinationPath assets.zip
+          Compress-Archive -Path include, build/publish/lib -DestinationPath assets_x64.zip
+      - name: Build project x86
+        run: |
+          cmake -G "Visual Studio 16 2019" -A Win32 -B "build_x86"
+          cd build_x86
+          msbuild github-actions-sample.sln /t:build /p:Configuration=Release -maxcpucount
+          mkdir publish
+          mkdir publish/bin
+          mkdir publish/lib
+          cd ..
+          copy build_x86/sayhello/Release/sayhello.lib build_x86/publish/lib
+          copy build_x86/sayhellocapi/Release/sayhellocapi.dll build_x86/publish/bin
+          Compress-Archive -Path include, build_x86/publish/lib -DestinationPath assets_x86.zip
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
         with:
@@ -66,15 +80,25 @@ jobs:
         run: |
           $value=cat release_url/release_url.txt
           echo "::set-output name=upload_url::$value"
-      - name: Upload Release Asset
+      - name: Upload Release Asset x64
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./assets.zip
-          asset_name: ${{ steps.get_version.outputs.result }}
+          asset_path: ./assets_x64.zip
+          asset_name: ${{ steps.get_version.outputs.result }}-x64.zip
+          asset_content_type: application/zip
+      - name: Upload Release Asset x86
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./assets_x86.zip
+          asset_name: ${{ steps.get_version.outputs.result }}-x86.zip
           asset_content_type: application/zip
 
   publish_linux:

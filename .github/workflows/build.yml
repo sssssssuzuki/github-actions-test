@@ -19,10 +19,16 @@ jobs:
     - name: setup-msbuild
       if: matrix.os == 'windows-latest'
       uses: microsoft/setup-msbuild@v1
-    - name: build for Windows
+    - name: build for Windows x64
       if: matrix.os == 'windows-latest'
       run: |
         cmake -G "Visual Studio 16 2019" -A x64 -B "build"
+        cd build
+        msbuild github-actions-sample.sln /t:build /p:Configuration=Release
+    - name: build for Windows x86
+      if: matrix.os == 'windows-latest'
+      run: |
+        cmake -G "Visual Studio 16 2019" -A x64 -B "build_x86"
         cd build
         msbuild github-actions-sample.sln /t:build /p:Configuration=Release
     - name: install gcc-10
