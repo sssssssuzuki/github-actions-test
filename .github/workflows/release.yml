@@ -81,7 +81,7 @@ jobs:
           $value=cat release_url/release_url.txt
           echo "::set-output name=upload_url::$value"
       - name: Upload Release Asset x64
-        id: upload-release-asset
+        id: upload-release-asset-win64
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -91,7 +91,7 @@ jobs:
           asset_name: ${{ steps.get_version.outputs.result }}-x64.zip
           asset_content_type: application/zip
       - name: Upload Release Asset x86
-        id: upload-release-asset
+        id: upload-release-asset-win32
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
