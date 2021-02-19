@@ -44,7 +44,7 @@ jobs:
     - name: build for arm32
       if: matrix.os == 'ubuntu-latest'
       run: |
-        mkdir -p build && cd build
+        mkdir -p build_arm32 && cd build_arm32
         cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=ARM32
         make
       shell: bash
@@ -54,7 +54,7 @@ jobs:
     - name: build for aarch64
       if: matrix.os == 'ubuntu-latest'
       run: |
-        mkdir -p build && cd build
+        mkdir -p build_arm64 && cd build_arm64
         cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=ARM64
         make
       shell: bash
