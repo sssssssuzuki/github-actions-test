@@ -70,7 +70,7 @@ jobs:
           cd ..
           copy build_x86/sayhello/Release/sayhello.lib build_x86/publish/lib
           copy build_x86/sayhellocapi/Release/sayhellocapi.dll build_x86/publish/bin
-          Compress-Archive -Path include, build_x86/publish/lib, sayhellocapi/publish/bin -DestinationPath assets_x86.zip
+          Compress-Archive -Path include, build_x86/publish/lib, build_x86/publish/bin -DestinationPath assets_x86.zip
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
         with:
