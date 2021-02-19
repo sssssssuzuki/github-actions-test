@@ -115,17 +115,57 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
-            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-linux-x64.tar.gz';
-      - name: Build project
+            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-linux';
+      - name: install gcc-10
         run: |
-          mkdir -p build
-          cd build
+          sudo apt update
+          sudo apt install gcc-10 g++-10 g++-arm-linux-gnueabihf g++-aarch64-linux-gnu -y
+        shell: bash
+      - name: Build project x64
+        run: |
+          mkdir -p build && cd build
           cmake .. -DCMAKE_BUILD_TYPE=Release
           make
           cd ..
-          mkdir lib
+          mkdir -p lib
+          mkdir -p bin
           cp -f build/sayhello/libsayhello.a lib
-          tar -zcvf assets.tar.gz include lib
+          cp -f build/sayhellocapi/libsayhellocapi.so bin
+          tar -zcvf assets_x64.tar.gz include lib bin
+        shell: bash
+        env:
+          CC: gcc-10
+          CXX: g++-10
+      - name: Build project arm32
+        run: |
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=ARM32
+          make
+          cd ..
+          mkdir -p lib
+          mkdir -p bin
+          cp -f build/sayhello/libsayhello.a lib
+          cp -f build/sayhellocapi/libsayhellocapi.so bin
+          tar -zcvf assets_arm32.tar.gz include lib bin
+        shell: bash
+        env:
+          CC: gcc-10
+          CXX: g++-10
+      - name: Build project arm64
+        run: |
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_TARGET=ARM64
+          make
+          cd ..
+          mkdir -p lib
+          mkdir -p bin
+          cp -f build/sayhello/libsayhello.a lib
+          cp -f build/sayhellocapi/libsayhellocapi.so bin
+          tar -zcvf assets_arm64.tar.gz include lib bin
+        shell: bash
+        env: 
+          CC: gcc-10
+          CXX: g++-10
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
         with:
@@ -135,15 +175,35 @@ jobs:
         run: |
           value=`cat release_url/release_url.txt`
           echo ::set-output name=upload_url::$value
-      - name: Upload Release Asset
-        id: upload-release-asset
+      - name: Upload Release Asset x64
+        id: upload-release-asset-x64
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-          asset_path: ./assets.tar.gz
-          asset_name: ${{ steps.get_version.outputs.result }}
+          asset_path: ./assets_x64.tar.gz
+          asset_name: ${{ steps.get_version.outputs.result }}-x64.tar.gz
+          asset_content_type: application/octet-stream
+      - name: Upload Release Asset arm32
+        id: upload-release-asset-arm32
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./assets_arm32.tar.gz
+          asset_name: ${{ steps.get_version.outputs.result }}-arm32.tar.gz
+          asset_content_type: application/octet-stream
+      - name: Upload Release Asset arm64
+        id: upload-release-asset-arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_release_info.outputs.upload_url }}
+          asset_path: ./assets_arm64.tar.gz
+          asset_name: ${{ steps.get_version.outputs.result }}-arm64.tar.gz
           asset_content_type: application/octet-stream
 
   publish_mac:

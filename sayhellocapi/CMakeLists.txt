@@ -19,14 +19,15 @@ if (POLICY CMP0079)
 endif()
 
 file(GLOB cpp_files *.cpp)
-file(GLOB include_files  ../include/*.hpp)
+file(GLOB include_files *.h ../include/*.h)
 
 set(SOURCE_LIST 
   ${cpp_files}
   ${include_files}
 )
 
-add_library(sayhello STATIC ${SOURCE_LIST})
+add_library(sayhellocapi SHARED ${SOURCE_LIST})
+target_link_libraries(sayhellocapi sayhello)
 
 include_directories(../include)
 
@@ -38,5 +39,5 @@ if(APPLE)
 endif()
 
 if(NOT WIN32)
-  set_target_properties(sayhello PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  set_target_properties(sayhellocapi PROPERTIES POSITION_INDEPENDENT_CODE ON)
 endif()
