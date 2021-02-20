@@ -208,7 +208,7 @@ jobs:
 
   publish_mac:
     needs: [release]
-    name: Upload Release Asset MacOS
+    name: Upload Release Asset macOS
     runs-on: macos-latest
     steps:
       - name: Checkout code
@@ -220,7 +220,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           result-encoding: string
           script: |
-            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-macos-x64.tar.gz';
+            return 'sayhello-'+context.payload.ref.replace(/refs\/tags\//, '')+'-macos-universal.tar.gz';
       - name: Build project
         run: |
           mkdir -p build
