@@ -229,8 +229,10 @@ jobs:
           make
           cd ..
           mkdir -p lib
+          mkdir -p bin
           cp -f build/sayhello/libsayhello.a lib
-          tar -zcvf assets.tar.gz include lib
+          cp -f build/sayhellocapi/libsayhellocapi.dylib bin
+          tar -zcvf assets.tar.gz include lib bin
       - name: Load Release URL File from release job
         uses: actions/download-artifact@v1
         with:
